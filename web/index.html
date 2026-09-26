@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mappick</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="brand">
+    <h1>mappick</h1>
+    <span class="tag">ranking objetivo de mapas</span>
+  </div>
+  <div id="status" class="status">carregando...</div>
+</header>
+
+<main>
+  <section class="panel lobby">
+    <div class="panel-head">
+      <h2>Quem está no lobby</h2>
+      <div class="head-tools">
+        <input id="search" type="search" placeholder="buscar colega..." autocomplete="off">
+        <button id="clear" class="ghost">limpar</button>
+      </div>
+    </div>
+    <p class="hint">Marque quem vai jogar com você. O ranking recalcula na hora,
+       repesando todo o histórico pela semelhança com esse time.
+       Clique com o botão direito num nome para fixá-lo como time fixo.</p>
+    <div id="mates" class="mates"></div>
+    <button id="showall" class="ghost more" hidden></button>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Ordem de pick</h2>
+      <label class="toggle">
+        <input type="checkbox" id="conservative">
+        <span>modo conservador <em>(desempata pelo pior caso do intervalo)</em></span>
+      </label>
+    </div>
+    <div id="ranking" class="ranking"></div>
+  </section>
+</main>
+
+<div id="tip" class="tip" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>

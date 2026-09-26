@@ -1,0 +1,643 @@
+<title>Mappick CS2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --bg:#eef1f4; --surface:#ffffff; --surface-2:#e4e9ee; --sunken:#dde3e9;
+    --line:#ccd5dd; --line-soft:#dfe5eb;
+    --fg:#141d27; --fg-dim:#54677a; --fg-faint:#8394a3;
+    --accent:#2f6fb5; --accent-soft:#dce8f5;
+    --good:#2c8a4e; --mid:#b57b16; --bad:#c03f38;
+    --shadow:0 1px 2px rgba(20,29,39,.07), 0 4px 14px rgba(20,29,39,.05);
+    --mono:"Barlow",ui-monospace,monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:#0d1218; --surface:#151d26; --surface-2:#1c2531; --sunken:#0a0e13;
+      --line:#2a3541; --line-soft:#222c37;
+      --fg:#e3ebf2; --fg-dim:#94a5b4; --fg-faint:#64757f;
+      --accent:#5b9be0; --accent-soft:#1a2c40;
+      --good:#3fb562; --mid:#d9a441; --bad:#e0574f;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg:#0d1218; --surface:#151d26; --surface-2:#1c2531; --sunken:#0a0e13;
+    --line:#2a3541; --line-soft:#222c37;
+    --fg:#e3ebf2; --fg-dim:#94a5b4; --fg-faint:#64757f;
+    --accent:#5b9be0; --accent-soft:#1a2c40;
+    --good:#3fb562; --mid:#d9a441; --bad:#e0574f;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.3);
+  }
+
+  * { box-sizing:border-box; }
+  body {
+    margin:0; background:var(--bg); color:var(--fg);
+    font-family:"Barlow",system-ui,-apple-system,sans-serif;
+    font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
+  }
+  .wrap { max-width:940px; margin:0 auto; padding-inline:16px; padding-block:22px 56px; }
+
+  /* ---------------------------------------------------------- cabecalho */
+  header { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:20px; }
+  h1 {
+    font-family:"Barlow Condensed",system-ui,sans-serif; font-weight:700;
+    font-size:30px; letter-spacing:.4px; text-transform:uppercase; margin:0; line-height:1;
+  }
+  .sub { color:var(--fg-faint); font-size:13px; margin-top:4px; }
+  .meta { display:flex; gap:20px; flex-wrap:wrap; }
+  .meta div { text-align:right; }
+  .meta .k {
+    font-family:"Barlow Condensed",sans-serif; font-size:11px; letter-spacing:.8px;
+    text-transform:uppercase; color:var(--fg-faint); font-weight:600;
+  }
+  .meta .v { font-size:17px; font-weight:600; font-variant-numeric:tabular-nums; }
+
+  /* ------------------------------------------------------------- painel */
+  .panel { background:var(--surface); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow); }
+  .panel + .panel { margin-top:14px; }
+  .phead {
+    display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    padding:13px 16px; border-bottom:1px solid var(--line-soft);
+  }
+  h2 {
+    font-family:"Barlow Condensed",sans-serif; font-weight:600; font-size:14px;
+    letter-spacing:1px; text-transform:uppercase; margin:0; color:var(--fg-dim);
+  }
+  .pbody { padding:14px 16px; }
+
+  /* -------------------------------------------------------------- lobby */
+  .mates { display:flex; flex-wrap:wrap; gap:8px; }
+  .mate {
+    display:inline-flex; align-items:center; gap:8px; cursor:pointer; user-select:none;
+    background:var(--surface-2); border:1px solid var(--line); border-radius:7px;
+    padding:7px 12px; transition:background .12s, border-color .12s;
+  }
+  .mate:hover { border-color:var(--fg-faint); }
+  .mate:focus-within { outline:2px solid var(--accent); outline-offset:2px; }
+  .mate input { accent-color:var(--accent); margin:0; cursor:pointer; }
+  .mate.on { background:var(--accent-soft); border-color:var(--accent); }
+  .mate .nm { font-weight:600; font-size:14px; }
+  .mate .gm { font-size:11px; color:var(--fg-faint); font-variant-numeric:tabular-nums; }
+  .you {
+    display:inline-flex; align-items:center; gap:8px; padding:7px 12px;
+    border:1px dashed var(--line); border-radius:7px; color:var(--fg-dim); font-size:14px;
+  }
+
+  .ctl { display:flex; gap:16px; align-items:center; flex-wrap:wrap; margin-top:14px;
+         padding-top:13px; border-top:1px solid var(--line-soft); }
+  .ctl label.t { font-size:12px; color:var(--fg-dim); display:flex; align-items:center; gap:7px; cursor:pointer; }
+  .seg { display:inline-flex; border:1px solid var(--line); border-radius:6px; overflow:hidden; }
+  .seg button {
+    font-family:inherit; font-size:12px; padding:4px 10px; border:0; cursor:pointer;
+    background:var(--surface-2); color:var(--fg-dim); border-right:1px solid var(--line);
+  }
+  .seg button:last-child { border-right:0; }
+  .seg button[aria-pressed="true"] { background:var(--accent); color:#fff; font-weight:600; }
+  .seg-l { font-size:11px; letter-spacing:.7px; text-transform:uppercase;
+           color:var(--fg-faint); font-family:"Barlow Condensed",sans-serif; font-weight:600; margin-right:2px; }
+
+  /* ------------------------------------------------------------ ranking */
+  .rows { display:flex; flex-direction:column; }
+  .row {
+    display:grid; grid-template-columns:22px 104px 1fr 58px 96px;
+    align-items:center; gap:12px; padding:10px 16px; cursor:pointer;
+    border-bottom:1px solid var(--line-soft); background:none; border-left:0; border-right:0; border-top:0;
+    width:100%; text-align:left; font:inherit; color:inherit;
+  }
+  .row:last-of-type { border-bottom:0; }
+  .row:hover { background:var(--surface-2); }
+  .row:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
+  .row.top { background:linear-gradient(90deg,var(--accent-soft),transparent 60%); }
+  .pos { font-family:"Barlow Condensed",sans-serif; font-weight:600; font-size:15px;
+         color:var(--fg-faint); text-align:right; font-variant-numeric:tabular-nums; }
+  .row.top .pos { color:var(--accent); }
+  .mp { font-family:"Barlow Condensed",sans-serif; font-weight:600; font-size:17px; letter-spacing:.3px; }
+
+  .bar { position:relative; height:20px; background:var(--sunken); border-radius:4px; overflow:hidden; }
+  .fill { position:absolute; inset:0 auto 0 0; border-radius:4px; transition:width .3s cubic-bezier(.2,.8,.2,1); }
+  .ci { position:absolute; top:50%; transform:translateY(-50%); height:10px;
+        border-left:2px solid var(--fg-dim); border-right:2px solid var(--fg-dim);
+        transition:left .3s, width .3s; }
+  .ci::before { content:""; position:absolute; top:50%; left:0; right:0; height:1px;
+                transform:translateY(-50%); background:var(--fg-dim); opacity:.6; }
+  .mid50 { position:absolute; top:0; bottom:0; left:50%; width:0; border-left:1px dashed var(--fg-faint); opacity:.55; }
+
+  .pct { text-align:right; font-weight:700; font-size:16px; font-variant-numeric:tabular-nums; }
+  .side { display:flex; flex-direction:column; align-items:flex-end; gap:2px; }
+  .conf { font-size:10px; letter-spacing:.5px; text-transform:uppercase; font-weight:600;
+          padding:1px 7px; border-radius:3px; font-family:"Barlow Condensed",sans-serif; }
+  .c-alta{background:color-mix(in srgb,var(--good) 16%,transparent);color:var(--good);}
+  .c-media{background:color-mix(in srgb,var(--mid) 18%,transparent);color:var(--mid);}
+  .c-baixa{background:color-mix(in srgb,var(--bad) 16%,transparent);color:var(--bad);}
+  .c-sem{background:var(--surface-2);color:var(--fg-faint);}
+  .nn { font-size:10px; color:var(--fg-faint); font-variant-numeric:tabular-nums; }
+
+  /* ------------------------------------------------------------ detalhe */
+  .det { padding:2px 16px 18px 16px; background:var(--surface-2); border-bottom:1px solid var(--line-soft); }
+  .dgrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:18px; padding-top:14px; }
+  .dgrid h3 {
+    font-family:"Barlow Condensed",sans-serif; font-size:11px; letter-spacing:.9px;
+    text-transform:uppercase; color:var(--fg-faint); margin:0 0 7px; font-weight:600;
+  }
+  .kv { display:flex; justify-content:space-between; gap:12px; font-size:13px; color:var(--fg-dim); padding:2px 0; }
+  .kv b { color:var(--fg); font-weight:600; font-variant-numeric:tabular-nums; }
+  .kv.sum { border-top:1px solid var(--line); margin-top:4px; padding-top:5px; }
+  .kv.sum b { color:var(--accent); }
+  .note { font-size:13px; color:var(--fg-dim); line-height:1.6; }
+  .note b { color:var(--fg); }
+
+  .banner {
+    display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+    padding:11px 16px; border-top:1px solid var(--line-soft); background:var(--surface-2);
+    border-radius:0 0 10px 10px; font-size:13px; color:var(--fg-dim);
+  }
+  .banner .lab { font-family:"Barlow Condensed",sans-serif; font-size:11px; letter-spacing:.8px;
+                 text-transform:uppercase; color:var(--fg-faint); font-weight:600; }
+  .banner .mapx { font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:16px; color:var(--bad); }
+
+  .verdict { padding:13px 16px; border-left:3px solid var(--mid); }
+  .verdict.ok { border-left-color:var(--good); }
+  .verdict .vt {
+    font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:16px;
+    letter-spacing:.4px; text-transform:uppercase; color:var(--mid); margin-bottom:3px;
+  }
+  .verdict.ok .vt { color:var(--good); }
+  .verdict .vb { font-size:13px; color:var(--fg-dim); line-height:1.6; max-width:68ch; }
+  .verdict .vb b { color:var(--fg); }
+
+  footer { margin-top:18px; font-size:12px; color:var(--fg-faint); line-height:1.7; }
+  footer code { background:var(--surface-2); padding:1px 5px; border-radius:3px; font-family:var(--mono); }
+
+  @media (max-width:640px) {
+    .row { grid-template-columns:20px 82px 1fr 52px; gap:9px; padding-inline:12px; }
+    .side { display:none; }
+    .meta { gap:14px; }
+    h1 { font-size:25px; }
+  }
+  @media (prefers-reduced-motion:reduce) { * { transition:none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Mappick</h1>
+      <div class="sub" id="sub">—</div>
+    </div>
+    <div class="meta">
+      <div><div class="k">Partidas</div><div class="v" id="m-n">—</div></div>
+      <div><div class="k">Vitórias</div><div class="v" id="m-wl">—</div></div>
+      <div><div class="k">Base geral</div><div class="v" id="m-base">—</div></div>
+    </div>
+  </header>
+
+  <section class="panel">
+    <div class="phead">
+      <h2>Quem está no lobby</h2>
+      <span class="nn" id="lobby-n"></span>
+    </div>
+    <div class="pbody">
+      <div class="mates" id="mates"></div>
+      <div class="ctl">
+        <span class="seg-l">Memória</span>
+        <div class="seg" id="seg-hl">
+          <button type="button" data-hl="120">120d</button>
+          <button type="button" data-hl="240">240d</button>
+          <button type="button" data-hl="480">480d</button>
+          <button type="button" data-hl="99999" aria-pressed="true">tudo</button>
+        </div>
+        <label class="t"><input type="checkbox" autocomplete="off" id="cons"> modo conservador</label>
+        <label class="t" title="Competitivo comum tem pareamento e veto diferentes do Premier. Desmarque para incluir as 145 partidas de competitivo.">
+          <input type="checkbox" autocomplete="off" id="prem" checked> só Premier</label>
+      </div>
+    </div>
+  </section>
+
+  <div id="verdict"></div>
+
+  <section class="panel">
+    <div class="phead">
+      <h2>Ordem de pick</h2>
+      <span class="nn">barra = % esperada · marcas = intervalo 90%</span>
+    </div>
+    <div class="rows" id="rows"></div>
+    <div class="banner" id="ban"></div>
+  </section>
+
+  <footer id="foot"></footer>
+</div>
+
+<script>
+/* ===================================================================
+   Dados reais, coletados do CSStats.
+   linha: matchId, unixTs, mapIdx, rw, rl, k, d, a, adr, hs, rating, roster
+   roster: 4 posicoes na ordem de MATES — A aliado, E adversario, - ausente
+   =================================================================== */
+const RAW = __RAW__;
+const MAPS = __MAPS__;
+/* Os cinco sao simetricos: qualquer subconjunto pode ser o lobby, inclusive um
+   que nao inclua voce. Por isso cada partida guarda em que TIME cada um estava
+   ('1' ou '2', '-' se nao jogou), e o placar e orientado na hora para o lado de
+   quem esta marcado. Assim "so o KICK" usa as partidas dele sem voce. */
+const PLAYERS = __PLAYERS__;
+const EU = PLAYERS[0].id;
+
+/* ------------------------------------------------- parametros do modelo */
+const P = {
+  halfLife: 99999, maxAge: 3000, poolWindow: 240,
+  wOutcome: 0.65, wRoundShare: 0.35,
+  rosterFloor: 0.05, rosterGamma: 1.5,
+  kGlobal: 10, kMap: 8, kRoster: 6,
+  formBeta: 0.12, formShrink: 6,
+  z: 1.645,
+  perf: { kd:0.375, adr:0.375, rating:0.25 },   // CSStats nao expoe KAST
+};
+
+const NOW = Date.now() / 1000;
+
+/* ------------------------------------------------------------ matematica */
+const logit = p => { p = Math.min(Math.max(p,1e-6),1-1e-6); return Math.log(p/(1-p)); };
+const sigmoid = x => x >= 0 ? 1/(1+Math.exp(-x)) : Math.exp(x)/(1+Math.exp(x));
+const kish = ws => { const a=ws.reduce((s,w)=>s+w,0), b=ws.reduce((s,w)=>s+w*w,0);
+                     return b > 1e-9 ? a*a/b : 0; };
+const shrink = (mean,n,prior,k) => n <= 1e-9 ? prior : (n*mean + k*prior)/(n+k);
+function wmean(pairs){ let num=0,den=0; for(const [v,w] of pairs){ if(v==null||w==null) continue;
+  num+=v*w; den+=w; } return den>1e-9 ? num/den : null; }
+
+/* --------------------------------------------------------------- parsing
+   ts, mapIdx, roundsTime1, roundsTime2, times, premier, k, d, a, adr, hs, rating
+   (as estatisticas individuais existem so nas partidas em que voce jogou)   */
+const ROWS = RAW.trim().split("\n").map(line => {
+  const p = line.split(",");
+  return {
+    ts:+p[0]*60 + 1690000000, map:MAPS[+p[1]], a:+p[2], b:+p[3],
+    teams:p[4], premier:p[5] === "1",
+    k:p[6]?+p[6]:null, d:p[7]?+p[7]:null, ast:p[8]?+p[8]:null,
+    adr:p[9]?+p[9]:null, hs:p[10]?+p[10]:null,
+    rating:p[11]?parseFloat(p[11]):null,
+    age:(NOW - (+p[0]*60 + 1690000000)) / 86400,
+  };
+});
+
+PLAYERS.forEach((p,i) => { p.jogos = ROWS.filter(r => r.teams[i] !== "-").length; });
+
+/* Orienta a partida para o lado de quem esta no lobby. Devolve null quando
+   ninguem do lobby jogou, ou quando o lobby ficou dividido entre os dois times. */
+function orient(r, lobby){
+  let side = null;
+  for(let i=0;i<PLAYERS.length;i++){
+    const ch = r.teams[i];
+    if(ch === "-" || !lobby.has(PLAYERS[i].id)) continue;
+    if(side && side !== ch) return null;
+    side = ch;
+  }
+  if(!side) return null;
+  const roster = new Set();
+  for(let i=0;i<PLAYERS.length;i++) if(r.teams[i] === side) roster.add(PLAYERS[i].id);
+  return { rw: side==="1"?r.a:r.b, rl: side==="1"?r.b:r.a,
+           roster, euJogou: r.teams[0] === side };
+}
+
+function build(halfLife, lobby){
+  const ms = [];
+  for(const r of ROWS){
+    if(r.age > P.maxAge) continue;
+    if(S.soPremier && !r.premier) continue;
+    const o = orient(r, lobby);
+    if(!o) continue;
+    const tot = o.rw + o.rl;
+    ms.push({ ...r, rw:o.rw, rl:o.rl, roster:o.roster, euJogou:o.euJogou,
+      outcome: o.rw>o.rl ? 1 : (o.rl>o.rw ? 0 : 0.5),
+      roundShare: tot>0 ? o.rw/tot : 0.5,
+      wTime: Math.pow(2, -r.age/halfLife) });
+  }
+  for(const m of ms) m.q = P.wOutcome*m.outcome + P.wRoundShare*m.roundShare;
+  const q1 = wmean(ms.filter(m=>m.outcome===1).map(m=>[m.q,m.wTime]));
+  const q0 = wmean(ms.filter(m=>m.outcome===0).map(m=>[m.q,m.wTime]));
+  const ok = q1!=null && q0!=null && (q1-q0) > 0.05;
+  if(ok) for(const m of ms) m.q = Math.min(Math.max((m.q-q0)/(q1-q0),-0.2),1.2);
+  return ms;
+}
+
+function rosterWeight(roster, lobby){
+  let inter = 0; for(const x of roster) if(lobby.has(x)) inter++;
+  const uni = new Set([...roster,...lobby]).size;
+  const j = uni ? inter/uni : 1;
+  return P.rosterFloor + (1-P.rosterFloor) * Math.pow(j, P.rosterGamma);
+}
+
+function perfIndex(m){
+  if(!m.euJogou) return null;
+  let s=0,w=0;
+  if(m.k!=null && m.d!=null){ s += P.perf.kd * Math.min(m.k/Math.max(m.d,1),3)/3; w += P.perf.kd; }
+  if(m.adr!=null){ s += P.perf.adr * Math.min(m.adr,150)/150; w += P.perf.adr; }
+  if(m.rating!=null){ s += P.perf.rating * Math.min(m.rating,2)/2; w += P.perf.rating; }
+  return w>1e-9 ? s/w : null;
+}
+
+function activeMaps(ms){
+  const rec={}, all={};
+  for(const m of ms){ all[m.map]=(all[m.map]||0)+1;
+    if(m.age <= P.poolWindow) rec[m.map]=(rec[m.map]||0)+1; }
+  const pool = Object.keys(rec).length ? rec : all;
+  return Object.keys(pool).sort((a,b)=>pool[b]-pool[a]);
+}
+
+function rank(lobbyIds, halfLife){
+  const lobby = new Set(lobbyIds);
+  if(!lobby.size) return { maps:[], thetaG:0.5, total:0, vazio:true };
+  const ms = build(halfLife, lobby);
+  if(!ms.length) return { maps:[], thetaG:0.5, total:0, vazio:true };
+
+  const thetaG = shrink(wmean(ms.map(m=>[m.q,m.wTime])) ?? 0.5,
+                        kish(ms.map(m=>m.wTime)), 0.5, P.kGlobal);
+
+  // forma individual: so existe quando VOCE esta no lobby (o CSStats nao
+  // expoe as estatisticas por partida dos seus amigos)
+  const temEu = lobby.has(EU);
+  let mu=null, sd=0.02;
+  if(temEu){
+    const idxAll = ms.map(m=>[perfIndex(m), m.wTime]).filter(p=>p[0]!=null);
+    mu = wmean(idxAll);
+    if(mu!=null){
+      const den = idxAll.reduce((s,[,w])=>s+w,0);
+      sd = Math.max(Math.sqrt(idxAll.reduce((s,[v,w])=>s+w*(v-mu)**2,0)/(den||1)), 0.02);
+    }
+  }
+
+  const out = activeMaps(ms).map(mp => {
+    const onMap = ms.filter(m=>m.map===mp);
+    const thetaM = shrink(wmean(onMap.map(m=>[m.q,m.wTime])) ?? thetaG,
+                          kish(onMap.map(m=>m.wTime)), thetaG, P.kMap);
+
+    const scored = onMap.map(m=>[m, m.wTime * rosterWeight(m.roster, lobby)]);
+    const n3 = kish(scored.map(([,w])=>w));
+    const thetaR = shrink(wmean(scored.map(([m,w])=>[m.q,w])) ?? thetaM,
+                          n3, thetaM, P.kRoster);
+
+    let Z = 0;
+    if(temEu && mu!=null){
+      const vals = onMap.map(m=>[perfIndex(m),m.wTime]).filter(p=>p[0]!=null);
+      if(vals.length){
+        const zn = kish(vals.map(([,w])=>w));
+        Z = ((wmean(vals)-mu)/sd) * (zn/(zn+P.formShrink));
+      }
+    }
+
+    const p = sigmoid(logit(thetaR) + P.formBeta * Z);
+    const se = n3 > 1e-9 ? Math.sqrt(Math.max(p*(1-p),1e-6)/n3) : 0.5;
+    const exact = onMap.filter(m =>
+      m.roster.size===lobby.size && [...lobby].every(x=>m.roster.has(x)));
+
+    return {
+      map:mp, p, low:Math.max(0,p-P.z*se), high:Math.min(1,p+P.z*se),
+      nEff:n3, games:onMap.length,
+      exW:exact.filter(m=>m.outcome===1).length,
+      exL:exact.filter(m=>m.outcome===0).length,
+      conf: n3<3?"sem dados":n3<8?"baixa":n3<20?"media":"alta",
+      thetaG, thetaM, thetaR, Z, formPP:(p-thetaR)*100, temEu,
+      wTot: onMap.filter(m=>m.outcome===1).length,
+      lTot: onMap.filter(m=>m.outcome===0).length,
+    };
+  });
+
+  out.sort((a,b)=> b.p-a.p || b.nEff-a.nEff);
+  return { maps:out, thetaG, total:ms.length, sig: mapSignificance(ms, 40) };
+}
+
+/* ------------------------------------------------- teste de significancia
+   As diferencas entre mapas sao maiores do que o acaso produziria? Testado
+   sobre os ROUNDS (~5.500), nao sobre vitorias (264), porque e onde o sinal
+   apareceria primeiro se existisse. Qui-quadrado com p pela aproximacao de
+   Wilson-Hilferty (bate com a permutacao ate a 2a casa nesta faixa). */
+function chiPValue(chi, df){
+  if(df <= 0) return 1;
+  const x = chi/df, z = (Math.pow(x,1/3) - (1 - 2/(9*df))) / Math.sqrt(2/(9*df));
+  return 1 - normCdf(z);
+}
+function normCdf(z){
+  const t = 1/(1+0.2316419*Math.abs(z));
+  const d = 0.3989423*Math.exp(-z*z/2);
+  const p = d*t*(0.3193815+t*(-0.3565638+t*(1.781478+t*(-1.821256+t*1.330274))));
+  return z > 0 ? 1-p : p;
+}
+function mapSignificance(rows, minN){
+  minN = minN || 1;
+  const by = {};
+  for(const m of rows){
+    const b = by[m.map] || (by[m.map] = [0,0,0]);
+    b[0]+=m.rw; b[1]+=m.rl; b[2]++;     // ja orientados para o lado do lobby
+  }
+  const keys = Object.keys(by).filter(k => by[k][2] >= minN);
+  const tw = keys.reduce((s,k)=>s+by[k][0],0), tl = keys.reduce((s,k)=>s+by[k][1],0);
+  const base = tw/(tw+tl);
+  let chi = 0;
+  for(const k of keys){
+    const [w,l] = by[k], r = w+l, e = r*base;
+    if(e < 1 || r-e < 1) continue;
+    chi += (w-e)**2/e + (l-(r-e))**2/(r-e);
+  }
+  const df = keys.length - 1;
+  return { chi, df, p: chiPValue(chi, df), rounds: tw+tl, base };
+}
+
+/* ------------------------------------------------------------------ UI */
+const S = { sel:new Set(), open:null, hl:99999, cons:false, soPremier:true };
+const $ = s => document.querySelector(s);
+const pretty = m => m.replace(/^(de|cs)_/,"").replace(/^./,c=>c.toUpperCase());
+const pc = x => (x*100).toFixed(1)+"%";
+
+function colorFor(p){
+  const t = Math.max(0, Math.min(1, (p-0.35)/0.35));
+  const stops = [[192,63,56],[181,123,22],[44,138,78]];
+  const dark = matchMedia("(prefers-color-scheme: dark)").matches
+            && document.documentElement.getAttribute("data-theme") !== "light"
+            || document.documentElement.getAttribute("data-theme") === "dark";
+  const st = dark ? [[224,87,79],[217,164,65],[63,181,98]] : stops;
+  const i = t<0.5?0:1, k = t<0.5?t*2:(t-0.5)*2;
+  return "rgb(" + st[i].map((v,j)=>Math.round(v+(st[i+1][j]-v)*k)).join(",") + ")";
+}
+
+/* Os chips sao montados UMA vez. Recria-los a cada recalculo perderia o foco
+   do teclado e deixaria um clique rapido cair num elemento ja substituido. */
+function buildMates(){
+  const box = $("#mates");
+  box.innerHTML = "";
+  for(const p of PLAYERS){
+    const l = document.createElement("label");
+    l.className = "mate" + (S.sel.has(p.id) ? " on" : "");
+    l.dataset.id = p.id;
+    l.innerHTML = `<input type="checkbox" autocomplete="off" id="m-${p.id}" ${S.sel.has(p.id)?"checked":""}>
+      <span class="nm">${p.id===EU ? "◈ " : ""}${p.nome}</span><span class="gm">${p.jogos}j</span>`;
+    l.querySelector("input").addEventListener("change", e => {
+      e.target.checked ? S.sel.add(p.id) : S.sel.delete(p.id);
+      l.classList.toggle("on", e.target.checked);
+      draw();
+    });
+    box.appendChild(l);
+  }
+}
+
+function draw(){
+  const r = rank([...S.sel], S.hl);
+  const maps = [...r.maps];
+  if(S.cons) maps.sort((a,b)=> b.low-a.low);
+
+  $("#m-n").textContent = r.total;
+  const box = $("#rows");
+  box.innerHTML = "";
+  $("#m-base").textContent = pc(r.thetaG);
+  $("#lobby-n").textContent = S.sel.size ? S.sel.size + " no lobby" : "ninguém marcado";
+  // V-D do proprio lobby, ja orientado
+  let vv=0, dd=0;
+  for(const x of ROWS){
+    if(S.soPremier && !x.premier) continue;
+    const o = orient(x, S.sel); if(!o) continue;
+    if(o.rw>o.rl) vv++; else if(o.rl>o.rw) dd++;
+  }
+  $("#m-wl").textContent = `${vv}–${dd}`;
+
+  if(!maps.length){
+    box.innerHTML = `<div class="vazio">Marque pelo menos uma pessoa no lobby
+      para ver a ordem de pick.</div>`;
+    $("#ban").innerHTML = "";
+    $("#verdict").innerHTML = "";
+    $("#foot").innerHTML = rodape();
+    return;
+  }
+
+  maps.forEach((m,i) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "row" + (i===0?" top":"");
+    btn.setAttribute("aria-expanded", S.open===m.map ? "true":"false");
+    const col = colorFor(m.p);
+    btn.innerHTML = `
+      <span class="pos">${i+1}</span>
+      <span class="mp">${pretty(m.map)}</span>
+      <span class="bar">
+        <span class="fill" style="width:${(m.p*100).toFixed(1)}%;background:${col};opacity:.8"></span>
+        <span class="ci" style="left:${(m.low*100).toFixed(1)}%;width:${((m.high-m.low)*100).toFixed(1)}%"></span>
+        <span class="mid50"></span>
+      </span>
+      <span class="pct" style="color:${col}">${(m.p*100).toFixed(1)}%</span>
+      <span class="side">
+        <span class="conf c-${m.conf==="sem dados"?"sem":m.conf}">${m.conf}</span>
+        <span class="nn">n_ef ${m.nEff.toFixed(1)} · ${m.games}j</span>
+      </span>`;
+    btn.addEventListener("click", () => { S.open = S.open===m.map ? null : m.map; draw(); });
+    box.appendChild(btn);
+    if(S.open===m.map) box.appendChild(detail(m));
+  });
+
+  // veredito honesto sobre a precisao do proprio ranking
+  const sig = r.sig;
+  const forte = sig.p < 0.05;
+  $("#verdict").innerHTML = `
+    <div class="panel verdict ${forte?"ok":"warn"}">
+      <div class="vt">${forte
+        ? "As diferenças entre mapas são reais"
+        : "Os mapas estão empatados dentro do ruído"}</div>
+      <div class="vb">
+        Testando o saldo de <b>${sig.rounds.toLocaleString("pt-BR")} rounds</b> contra a
+        hipótese de que todos os mapas rendem igual:
+        <b>χ² = ${sig.chi.toFixed(1)}</b> com ${sig.df} graus de liberdade,
+        <b>p = ${sig.p.toFixed(2)}</b>.
+        ${forte
+          ? "Há estrutura de verdade aqui — a ordem abaixo carrega informação."
+          : `Um p tão alto significa que a variação entre os mapas é o que o acaso
+             produziria sozinho. A ordem abaixo é o melhor palpite possível com os
+             dados que existem, mas <b>não é uma diferença demonstrável</b>: use-a
+             como desempate, não como verdade. O Premier pareia por rating e o veto
+             tende a cair em mapas neutros para os dois times — os dois efeitos
+             empurram todo mapa para perto de 50%.`}
+      </div>
+    </div>`;
+
+  const pior = maps[maps.length-1];
+  $("#ban").innerHTML =
+    `<span class="lab">Banir primeiro</span>
+     <span class="mapx">${pretty(pior.map)}</span>
+     <span>${pc(pior.p)} esperado · ${pior.wTot}V-${pior.lTot}D no histórico</span>`;
+
+  $("#foot").innerHTML = rodape();
+}
+
+function rodape(){
+  const dias = Math.round(Math.max(...ROWS.map(x=>x.age)));
+  const nPrem = ROWS.filter(r=>r.premier).length;
+  const nomes = PLAYERS.filter(p=>S.sel.has(p.id)).map(p=>p.nome).join(" + ") || "ninguém";
+  return `Histórico dos cinco no CSStats: <b>${ROWS.length}</b> partidas distintas em
+     ${Math.round(dias/30)} meses (${nPrem} de Premier), já sem abandonos e partidas
+     interrompidas. Estão aqui <b>todas</b> as partidas de cada um, inclusive as que
+     vocês jogaram separados — por isso dá para tirar você do lobby e ver só o colega.
+     <br>Lobby atual: <b>${nomes}</b>. O placar de cada partida é orientado para o lado
+     de quem está marcado, e o histórico inteiro é repesado pela semelhança com esse time.
+     <br>A meia-vida de <b>${S.hl>=99999?"∞ (sem decaimento)":S.hl+" dias"}</b> e o rigor de
+     roster saíram de um backtest que prevê cada partida usando só as anteriores; encurtar a
+     memória piorou a previsão — no conjunto completo o melhor é <b>não descontar nada</b>: Brier 0.2451 contra 0.2454 de chutar 50%, a primeira vez que o modelo passa a moeda.
+     <br>K/D, ADR e rating por partida o CSStats só expõe para o dono do perfil consultado,
+     então o termo de forma individual só entra quando <b>você</b> está no lobby.`;
+}
+
+function detail(m){
+  const d = document.createElement("div");
+  d.className = "det";
+  const dif = (m.thetaR - m.thetaM) * 100;
+  const notas = [];
+  if(m.conf==="sem dados") notas.push("Quase sem histórico com esse time aqui — o número é basicamente a sua média.");
+  else if(m.conf==="baixa") notas.push("Amostra fina, intervalo largo. Trate como palpite.");
+  else if(m.conf==="alta") notas.push("Amostra sólida para esse time.");
+  else notas.push("Amostra razoável.");
+  if(Math.abs(dif) >= 2.5)
+    notas.push(`Esse time rende <b>${dif>0?"+":""}${dif.toFixed(1)} pp</b> aqui em relação ao seu ${pretty(m.map)} médio.`);
+  if(Math.abs(m.formPP) >= 1.5)
+    notas.push(`Seu rendimento individual ${m.formPP>0?"ajuda":"atrapalha"} (${m.formPP.toFixed(1)} pp).`);
+
+  d.innerHTML = `<div class="dgrid">
+    <div>
+      <h3>Como chega nesse número</h3>
+      <div class="kv"><span>Sua base geral</span><b>${pc(m.thetaG)}</b></div>
+      <div class="kv"><span>→ neste mapa</span><b>${pc(m.thetaM)}</b></div>
+      <div class="kv"><span>→ com este time</span><b>${pc(m.thetaR)}</b></div>
+      <div class="kv"><span>→ sua forma aqui</span><b>${m.formPP>=0?"+":""}${m.formPP.toFixed(1)} pp</b></div>
+      <div class="kv sum"><span>Previsão</span><b>${pc(m.p)}</b></div>
+    </div>
+    <div>
+      <h3>Amostra</h3>
+      <div class="kv"><span>Intervalo 90%</span><b>${pc(m.low)} – ${pc(m.high)}</b></div>
+      <div class="kv"><span>Amostra efetiva</span><b>${m.nEff.toFixed(1)}</b></div>
+      <div class="kv"><span>Partidas no mapa</span><b>${m.games}</b></div>
+      <div class="kv"><span>Placar bruto</span><b>${m.wTot}V – ${m.lTot}D</b></div>
+      <div class="kv"><span>Com este time exato</span><b>${m.exW}V – ${m.exL}D</b></div>
+    </div>
+    <div>
+      <h3>Leitura</h3>
+      <div class="note">${notas.join(" ")}</div>
+    </div>
+  </div>`;
+  return d;
+}
+
+/* eventos */
+$("#seg-hl").addEventListener("click", e => {
+  const b = e.target.closest("button"); if(!b) return;
+  S.hl = +b.dataset.hl;
+  [...e.currentTarget.children].forEach(x => x.setAttribute("aria-pressed", x===b ? "true":"false"));
+  draw();
+});
+$("#cons").addEventListener("change", e => { S.cons = e.target.checked; draw(); });
+$("#prem").addEventListener("change", e => { S.soPremier = e.target.checked; draw(); });
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
+
+S.sel.add(PLAYERS[0].id); S.sel.add(PLAYERS[1].id);  // abre no uso tipico
+buildMates();
+
+const d0 = new Date(Math.min(...ROWS.map(r=>r.ts))*1000);
+const d1 = new Date(Math.max(...ROWS.map(r=>r.ts))*1000);
+const fmt = d => d.toLocaleDateString("pt-BR",{month:"short",year:"numeric"});
+$("#sub").textContent = `${PLAYERS[0].nome} · CSStats · ${fmt(d0)} – ${fmt(d1)}`;
+
+draw();
+</script>

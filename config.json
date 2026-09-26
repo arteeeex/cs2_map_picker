@@ -1,0 +1,45 @@
+{
+  "me": "76561198816645847",
+  "sources": {
+    "csstats": {
+      "enabled": true,
+      "steam64": "76561198816645847",
+      "pages": 4
+    },
+    "leetify": {
+      "enabled": true,
+      "steam64": "76561198816645847"
+    }
+  },
+  "map_pool": "auto",
+  "model": {
+    "half_life_days": 99999,
+    "outcome_weight": 0.65,
+    "round_share_weight": 0.35,
+    "roster_floor": 0.05,
+    "roster_sharpness": 1.5,
+    "shrink_global": 10,
+    "shrink_map": 8,
+    "shrink_roster": 6,
+    "form_beta": 0.12,
+    "form_shrink": 6,
+    "max_age_days": 3000,
+    "confidence_z": 1.645,
+    "pool_window_days": 120
+  },
+  "perf_weights": {
+    "kd": 0.3,
+    "adr": 0.3,
+    "kast": 0.2,
+    "rating": 0.2
+  },
+  "map_resets": {},
+  "group": [
+    "76561198816645847",
+    "76561198426648959",
+    "76561198799388505",
+    "76561199039885619",
+    "76561198344042074"
+  ],
+  "port": 8770
+}
