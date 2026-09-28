@@ -1,3 +1,5 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mappick CS2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -85,23 +87,26 @@
     border:1px dashed var(--line); border-radius:7px; color:var(--fg-dim); font-size:14px;
   }
 
-  .ctl { display:flex; gap:16px; align-items:center; flex-wrap:wrap; margin-top:14px;
-         padding-top:13px; border-top:1px solid var(--line-soft); }
-  .ctl label.t { font-size:12px; color:var(--fg-dim); display:flex; align-items:center; gap:7px; cursor:pointer; }
-  .seg { display:inline-flex; border:1px solid var(--line); border-radius:6px; overflow:hidden; }
-  .seg button {
-    font-family:inherit; font-size:12px; padding:4px 10px; border:0; cursor:pointer;
-    background:var(--surface-2); color:var(--fg-dim); border-right:1px solid var(--line);
-  }
+  .peso { margin-top:14px; padding-top:12px; border-top:1px solid var(--line-soft);
+          font-size:12px; color:var(--fg-dim); line-height:1.65; }
+  .peso b { color:var(--fg); font-variant-numeric:tabular-nums; }
+  .season { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:14px;
+            padding-top:12px; border-top:1px solid var(--line-soft); }
+  .seg-l { font-family:"Barlow Condensed",sans-serif; font-size:11px; letter-spacing:.8px;
+           text-transform:uppercase; color:var(--fg-faint); font-weight:600; }
+  .seg { display:inline-flex; border:1px solid var(--line); border-radius:6px; overflow:hidden; flex-wrap:wrap; }
+  .seg button { font-family:inherit; font-size:12px; padding:5px 11px; border:0; cursor:pointer;
+                background:var(--surface-2); color:var(--fg-dim); border-right:1px solid var(--line);
+                font-variant-numeric:tabular-nums; }
   .seg button:last-child { border-right:0; }
+  .seg button:hover { color:var(--fg); }
+  .seg button:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
   .seg button[aria-pressed="true"] { background:var(--accent); color:#fff; font-weight:600; }
-  .seg-l { font-size:11px; letter-spacing:.7px; text-transform:uppercase;
-           color:var(--fg-faint); font-family:"Barlow Condensed",sans-serif; font-weight:600; margin-right:2px; }
 
   /* ------------------------------------------------------------ ranking */
   .rows { display:flex; flex-direction:column; }
   .row {
-    display:grid; grid-template-columns:22px 104px 1fr 58px 96px;
+    display:grid; grid-template-columns:22px 104px 1fr 58px 150px;
     align-items:center; gap:12px; padding:10px 16px; cursor:pointer;
     border-bottom:1px solid var(--line-soft); background:none; border-left:0; border-right:0; border-top:0;
     width:100%; text-align:left; font:inherit; color:inherit;
@@ -167,6 +172,32 @@
   .verdict .vb { font-size:13px; color:var(--fg-dim); line-height:1.6; max-width:68ch; }
   .verdict .vb b { color:var(--fg); }
 
+  .vazio { padding:22px 16px; color:var(--fg-dim); font-size:14px; }
+  .up { color:var(--good); } .dn { color:var(--bad); }
+
+  /* ------------------------------------------------ tabela de relevancia */
+  .tscroll { overflow-x:auto; }
+  table.rel { width:100%; border-collapse:collapse; font-size:13px; font-variant-numeric:tabular-nums; }
+  .rel th { text-align:left; font-family:"Barlow Condensed",sans-serif; font-size:11px; letter-spacing:.7px;
+            text-transform:uppercase; color:var(--fg-faint); font-weight:600; padding:8px 10px;
+            border-bottom:1px solid var(--line); white-space:nowrap; }
+  .rel td { padding:6px 10px; border-bottom:1px solid var(--line-soft); color:var(--fg-dim); white-space:nowrap; }
+  .rel tr:last-child td { border-bottom:0; }
+  .rel td.r, .rel th.r { text-align:right; }
+  .rel .res { font-weight:700; }
+  .rel .res.v { color:var(--good); } .rel .res.d { color:var(--bad); }
+  .rel .mpn { color:var(--fg); font-weight:600; }
+  .relv { display:flex; align-items:center; gap:8px; justify-content:flex-end; }
+  .relv b { color:var(--fg); min-width:48px; text-align:right; }
+  .relbar { width:70px; height:6px; background:var(--sunken); border-radius:3px; overflow:hidden; }
+  .relbar i { display:block; height:100%; background:var(--accent); }
+  .tfoot { display:flex; gap:12px; align-items:center; flex-wrap:wrap; padding:10px 16px;
+           border-top:1px solid var(--line-soft); font-size:12px; color:var(--fg-faint); }
+  .tfoot b { color:var(--fg); }
+  .tfoot button, .phead select { font:inherit; font-size:12px; padding:4px 10px; border-radius:6px; cursor:pointer;
+           border:1px solid var(--line); background:var(--surface-2); color:var(--fg-dim); }
+  @media (max-width:640px) { .rel .hm { display:none; } .relbar { width:40px; } .rel td, .rel th { padding-inline:6px; } }
+
   footer { margin-top:18px; font-size:12px; color:var(--fg-faint); line-height:1.7; }
   footer code { background:var(--surface-2); padding:1px 5px; border-radius:3px; font-family:var(--mono); }
 
@@ -199,18 +230,12 @@
     </div>
     <div class="pbody">
       <div class="mates" id="mates"></div>
-      <div class="ctl">
-        <span class="seg-l">Memória</span>
-        <div class="seg" id="seg-hl">
-          <button type="button" data-hl="120">120d</button>
-          <button type="button" data-hl="240">240d</button>
-          <button type="button" data-hl="480">480d</button>
-          <button type="button" data-hl="99999" aria-pressed="true">tudo</button>
-        </div>
-        <label class="t"><input type="checkbox" autocomplete="off" id="cons"> modo conservador</label>
-        <label class="t" title="Competitivo comum tem pareamento e veto diferentes do Premier. Desmarque para incluir as 145 partidas de competitivo.">
-          <input type="checkbox" autocomplete="off" id="prem" checked> só Premier</label>
+      <div class="season">
+        <span class="seg-l">Season do Premier</span>
+        <div class="seg" id="seg-season" role="group" aria-label="Filtrar por season do Premier"></div>
+        <span class="nn" id="season-info"></span>
       </div>
+      <div class="peso" id="peso"></div>
     </div>
   </section>
 
@@ -225,62 +250,112 @@
     <div class="banner" id="ban"></div>
   </section>
 
+  <section class="panel" style="margin-top:14px">
+    <div class="phead">
+      <h2>Detalhamento do cálculo</h2>
+      <select id="tmap" aria-label="Filtrar por mapa"></select>
+    </div>
+    <div class="pbody note" id="tlead" style="padding-bottom:4px"></div>
+    <div class="tscroll"><table class="rel" id="tbl"></table></div>
+    <div class="tfoot" id="tfoot"></div>
+  </section>
+
   <footer id="foot"></footer>
 </div>
 
 <script>
 /* ===================================================================
-   Dados reais, coletados do CSStats.
-   linha: matchId, unixTs, mapIdx, rw, rl, k, d, a, adr, hs, rating, roster
-   roster: 4 posicoes na ordem de MATES — A aliado, E adversario, - ausente
+   Dados reais, coletados do CSStats (uniao das partidas dos 13).
+   linha: minutos desde 1690000000, mapIdx, rounds time 1, rounds time 2,
+          times (13 chars: '1'/'2' = time em que cada um jogou, '-' ausente),
+          premier (1/0),
+          desempenho: 2 digitos 00-99 por jogador presente, na ordem, "xx" sem stats
    =================================================================== */
 const RAW = __RAW__;
 const MAPS = __MAPS__;
-/* Os cinco sao simetricos: qualquer subconjunto pode ser o lobby, inclusive um
-   que nao inclua voce. Por isso cada partida guarda em que TIME cada um estava
-   ('1' ou '2', '-' se nao jogou), e o placar e orientado na hora para o lado de
-   quem esta marcado. Assim "so o KICK" usa as partidas dele sem voce. */
+/* Os 13 sao simetricos: qualquer subconjunto pode ser o lobby, inclusive um
+   que nao inclua voce. O placar e orientado na hora para o lado de quem esta
+   marcado. */
 const PLAYERS = __PLAYERS__;
 const EU = PLAYERS[0].id;
 
-/* ------------------------------------------------- parametros do modelo */
+/* ------------------------------------------------- regras fixas do modelo
+   Nada aqui e escolha de quem usa a pagina:
+   - so Premier (no Competitivo o mapa vem da fila, sem veto)
+   - peso por idade LINEAR na ordem das partidas: a mais antiga do lobby vale
+     0%, a mais recente 100%, as do meio em partes iguais
+   - vitoria e desempenho (K/D, ADR, rating) entram metade/metade
+   - a conversao de desempenho para % de vitoria sai do proprio historico   */
 const P = {
-  halfLife: 99999, maxAge: 3000, poolWindow: 240,
+  poolWindow: 240,                 // mapas jogados nos ultimos 240 dias = pool atual
   wOutcome: 0.65, wRoundShare: 0.35,
   rosterFloor: 0.05, rosterGamma: 1.5,
-  kGlobal: 10, kMap: 8, kRoster: 6,
-  formBeta: 0.12, formShrink: 6,
+  kGlobal: 10, kMap: 8, kRoster: 6, kPerf: 6,
+  kdShare: 0.5,
+  trail: 50,                       // K/D comparado com as 50 partidas anteriores do jogador
   z: 1.645,
-  perf: { kd:0.375, adr:0.375, rating:0.25 },   // CSStats nao expoe KAST
 };
 
 const NOW = Date.now() / 1000;
 
 /* ------------------------------------------------------------ matematica */
 const logit = p => { p = Math.min(Math.max(p,1e-6),1-1e-6); return Math.log(p/(1-p)); };
-const sigmoid = x => x >= 0 ? 1/(1+Math.exp(-x)) : Math.exp(x)/(1+Math.exp(x));
 const kish = ws => { const a=ws.reduce((s,w)=>s+w,0), b=ws.reduce((s,w)=>s+w*w,0);
-                     return b > 1e-9 ? a*a/b : 0; };
-const shrink = (mean,n,prior,k) => n <= 1e-9 ? prior : (n*mean + k*prior)/(n+k);
+                     return b > 1e-12 ? a*a/b : 0; };
+const shrink = (mean,n,prior,k) => (mean==null || n <= 1e-9) ? prior : (n*mean + k*prior)/(n+k);
 function wmean(pairs){ let num=0,den=0; for(const [v,w] of pairs){ if(v==null||w==null) continue;
-  num+=v*w; den+=w; } return den>1e-9 ? num/den : null; }
+  num+=v*w; den+=w; } return den>1e-12 ? num/den : null; }
+const clamp = (x,a,b) => Math.min(Math.max(x,a),b);
 
-/* --------------------------------------------------------------- parsing
-   ts, mapIdx, roundsTime1, roundsTime2, times, premier, k, d, a, adr, hs, rating
-   (as estatisticas individuais existem so nas partidas em que voce jogou)   */
+/* Seasons do Premier. Inicio = reset do CS Rating (datas publicadas, conferidas
+   no historico dos 13: a ultima partida com rating visivel cai antes de cada
+   data e ha pelo menos 1 dia sem partidas em cada virada). */
+const SEASONS = [
+  { n:1, ini:"2023-09-27" }, { n:2, ini:"2025-01-28" }, { n:3, ini:"2025-07-15" },
+  { n:4, ini:"2026-01-21" }, { n:5, ini:"2026-07-06" },
+].map((s,i,a) => ({ ...s, t0: Date.parse(s.ini+"T00:00:00Z")/1000,
+                    t1: i+1 < a.length ? Date.parse(a[i+1].ini+"T00:00:00Z")/1000 : Infinity }));
+const seasonOf = ts => { let n = SEASONS[0].n; for(const s of SEASONS) if(ts >= s.t0) n = s.n; return n; };
+
+/* --------------------------------------------------------------- parsing */
 const ROWS = RAW.trim().split("\n").map(line => {
   const p = line.split(",");
-  return {
-    ts:+p[0]*60 + 1690000000, map:MAPS[+p[1]], a:+p[2], b:+p[3],
-    teams:p[4], premier:p[5] === "1",
-    k:p[6]?+p[6]:null, d:p[7]?+p[7]:null, ast:p[8]?+p[8]:null,
-    adr:p[9]?+p[9]:null, hs:p[10]?+p[10]:null,
-    rating:p[11]?parseFloat(p[11]):null,
-    age:(NOW - (+p[0]*60 + 1690000000)) / 86400,
-  };
-});
+  const ts = +p[0]*60 + 1690000000, teams = p[4], dig = p[6] || "";
+  const perf = new Array(PLAYERS.length).fill(null);
+  let j = 0;
+  for(let i=0;i<PLAYERS.length;i++){
+    if(teams[i] === "-") continue;
+    const s = dig.substr(j,2); j += 2;
+    if(s && s !== "xx") perf[i] = +s;
+  }
+  return { ts, map:MAPS[+p[1]], a:+p[2], b:+p[3], teams, premier:p[5] === "1", perf,
+           season: seasonOf(ts), age:(NOW - ts) / 86400 };
+}).sort((x,y) => x.ts - y.ts);
 
-PLAYERS.forEach((p,i) => { p.jogos = ROWS.filter(r => r.teams[i] !== "-").length; });
+/* Nivel de cada jogador NA EPOCA de cada partida: media do indice dele nas 50
+   partidas de Premier anteriores (minimo 10). O nivel muda muito com o tempo
+   (KICK subiu ~10 pontos, voce caiu ~8); comparar com a media de sempre
+   confundiria "mapa" com "epoca": o mapa mais jogado quando alguem era pior
+   levaria a culpa. Nao depende do lobby nem do filtro de season. */
+(function(){
+  const hist = PLAYERS.map(() => []);
+  for(const r of ROWS){
+    r.lb = new Array(PLAYERS.length).fill(null);
+    if(!r.premier) continue;
+    for(let i=0;i<PLAYERS.length;i++){
+      const v = r.perf[i]; if(v == null) continue;
+      const h = hist[i];
+      if(h.length >= 10){ const xs = h.slice(-P.trail); r.lb[i] = xs.reduce((s,x)=>s+x,0)/xs.length; }
+      h.push(v);
+    }
+  }
+})();
+
+PLAYERS.forEach((p,i) => {
+  const mine = ROWS.filter(r => r.premier && r.teams[i] !== "-");
+  p.jogos = { 0: mine.length };                     // 0 = todas as seasons
+  for(const s of SEASONS) p.jogos[s.n] = mine.filter(r => r.season === s.n).length;
+});
 
 /* Orienta a partida para o lado de quem esta no lobby. Devolve null quando
    ninguem do lobby jogou, ou quando o lobby ficou dividido entre os dois times. */
@@ -293,31 +368,13 @@ function orient(r, lobby){
     side = ch;
   }
   if(!side) return null;
-  const roster = new Set();
-  for(let i=0;i<PLAYERS.length;i++) if(r.teams[i] === side) roster.add(PLAYERS[i].id);
-  return { rw: side==="1"?r.a:r.b, rl: side==="1"?r.b:r.a,
-           roster, euJogou: r.teams[0] === side };
-}
-
-function build(halfLife, lobby){
-  const ms = [];
-  for(const r of ROWS){
-    if(r.age > P.maxAge) continue;
-    if(S.soPremier && !r.premier) continue;
-    const o = orient(r, lobby);
-    if(!o) continue;
-    const tot = o.rw + o.rl;
-    ms.push({ ...r, rw:o.rw, rl:o.rl, roster:o.roster, euJogou:o.euJogou,
-      outcome: o.rw>o.rl ? 1 : (o.rl>o.rw ? 0 : 0.5),
-      roundShare: tot>0 ? o.rw/tot : 0.5,
-      wTime: Math.pow(2, -r.age/halfLife) });
+  const roster = new Set(), perfL = [];
+  for(let i=0;i<PLAYERS.length;i++){
+    if(r.teams[i] !== side) continue;
+    roster.add(PLAYERS[i].id);
+    if(lobby.has(PLAYERS[i].id) && r.perf[i] != null) perfL.push([i, r.perf[i]]);
   }
-  for(const m of ms) m.q = P.wOutcome*m.outcome + P.wRoundShare*m.roundShare;
-  const q1 = wmean(ms.filter(m=>m.outcome===1).map(m=>[m.q,m.wTime]));
-  const q0 = wmean(ms.filter(m=>m.outcome===0).map(m=>[m.q,m.wTime]));
-  const ok = q1!=null && q0!=null && (q1-q0) > 0.05;
-  if(ok) for(const m of ms) m.q = Math.min(Math.max((m.q-q0)/(q1-q0),-0.2),1.2);
-  return ms;
+  return { rw: side==="1"?r.a:r.b, rl: side==="1"?r.b:r.a, roster, perfL };
 }
 
 function rosterWeight(roster, lobby){
@@ -327,68 +384,88 @@ function rosterWeight(roster, lobby){
   return P.rosterFloor + (1-P.rosterFloor) * Math.pow(j, P.rosterGamma);
 }
 
-function perfIndex(m){
-  if(!m.euJogou) return null;
-  let s=0,w=0;
-  if(m.k!=null && m.d!=null){ s += P.perf.kd * Math.min(m.k/Math.max(m.d,1),3)/3; w += P.perf.kd; }
-  if(m.adr!=null){ s += P.perf.adr * Math.min(m.adr,150)/150; w += P.perf.adr; }
-  if(m.rating!=null){ s += P.perf.rating * Math.min(m.rating,2)/2; w += P.perf.rating; }
-  return w>1e-9 ? s/w : null;
+function build(lobby, seasons = S.seasons){
+  const ms = [];
+  for(const r of ROWS){                      // ROWS ja esta em ordem cronologica
+    if(!r.premier) continue;
+    if(seasons.size && !seasons.has(r.season)) continue;
+    const o = orient(r, lobby);
+    if(!o) continue;
+    const tot = o.rw + o.rl;
+    ms.push({ ...r, rw:o.rw, rl:o.rl, roster:o.roster, perfL:o.perfL,
+      outcome: o.rw>o.rl ? 1 : (o.rl>o.rw ? 0 : 0.5),
+      roundShare: tot>0 ? o.rw/tot : 0.5,
+      wLine: rosterWeight(o.roster, lobby) });
+  }
+  // peso linear: 1a partida 0%, ultima 100%, o resto dividido em partes iguais
+  const n = ms.length;
+  ms.forEach((m,i) => { m.wIdade = n > 1 ? i/(n-1) : 1; m.w = m.wIdade * m.wLine; });
+
+  // alvo continuo (vitoria + saldo de rounds), recalibrado para a escala de vitoria
+  for(const m of ms) m.q = P.wOutcome*m.outcome + P.wRoundShare*m.roundShare;
+  const q1 = wmean(ms.filter(m=>m.outcome===1).map(m=>[m.q,m.wIdade]));
+  const q0 = wmean(ms.filter(m=>m.outcome===0).map(m=>[m.q,m.wIdade]));
+  if(q1!=null && q0!=null && (q1-q0) > 0.05)
+    for(const m of ms) m.q = clamp((m.q-q0)/(q1-q0), -0.2, 1.2);
+
+  // desempenho: cada jogador contra o proprio nivel na epoca (r.lb), assim quem
+  // joga sempre bem nao puxa para cima os mapas que joga mais, e quem melhorou
+  // ou piorou com o tempo nao joga a culpa nos mapas de cada fase
+  for(const m of ms){
+    const ds = m.perfL.filter(([i]) => m.lb[i] != null).map(([i,v]) => v - m.lb[i]);
+    m.D = ds.length ? ds.reduce((s,x)=>s+x,0)/ds.length : null;
+  }
+  return ms;
 }
 
 function activeMaps(ms){
-  const rec={}, all={};
+  const rec={}, all={}, tLast = ms.length ? ms[ms.length-1].ts : NOW;
   for(const m of ms){ all[m.map]=(all[m.map]||0)+1;
-    if(m.age <= P.poolWindow) rec[m.map]=(rec[m.map]||0)+1; }
-  const pool = Object.keys(rec).length ? rec : all;
+    if((tLast - m.ts)/86400 <= P.poolWindow) rec[m.map]=(rec[m.map]||0)+1; }
+  // com season marcada: todos os mapas que o lobby jogou nela
+  const pool = S.seasons.size ? all : (Object.keys(rec).length ? rec : all);
   return Object.keys(pool).sort((a,b)=>pool[b]-pool[a]);
 }
 
-function rank(lobbyIds, halfLife){
+function rank(lobbyIds){
   const lobby = new Set(lobbyIds);
-  if(!lobby.size) return { maps:[], thetaG:0.5, total:0, vazio:true };
-  const ms = build(halfLife, lobby);
-  if(!ms.length) return { maps:[], thetaG:0.5, total:0, vazio:true };
+  if(!lobby.size) return { maps:[], thetaG:0.5, total:0, ms:[], lobby };
+  const ms = build(lobby);
+  if(!ms.length) return { maps:[], thetaG:0.5, total:0, ms, lobby };
 
-  const thetaG = shrink(wmean(ms.map(m=>[m.q,m.wTime])) ?? 0.5,
-                        kish(ms.map(m=>m.wTime)), 0.5, P.kGlobal);
+  const thetaG = shrink(wmean(ms.map(m=>[m.q,m.wIdade])), kish(ms.map(m=>m.wIdade)), 0.5, P.kGlobal);
 
-  // forma individual: so existe quando VOCE esta no lobby (o CSStats nao
-  // expoe as estatisticas por partida dos seus amigos)
-  const temEu = lobby.has(EU);
-  let mu=null, sd=0.02;
-  if(temEu){
-    const idxAll = ms.map(m=>[perfIndex(m), m.wTime]).filter(p=>p[0]!=null);
-    mu = wmean(idxAll);
-    if(mu!=null){
-      const den = idxAll.reduce((s,[,w])=>s+w,0);
-      sd = Math.max(Math.sqrt(idxAll.reduce((s,[v,w])=>s+w*(v-mu)**2,0)/(den||1)), 0.02);
-    }
+  /* Quanto 1 ponto de desempenho acima da media vale em resultado, medido no
+     proprio historico do lobby (regressao ponderada). E o que transforma o
+     K/D de um mapa em % de vitoria, sem numero escolhido a mao. */
+  let slope = 0;
+  const ref = S.seasons.size ? build(lobby, new Set()) : ms;
+  const dd = ref.filter(m => m.D != null && m.wIdade > 0);
+  if(dd.length > 20){
+    const sw = dd.reduce((s,m)=>s+m.wIdade,0);
+    const mx = dd.reduce((s,m)=>s+m.D*m.wIdade,0)/sw, my = dd.reduce((s,m)=>s+m.q*m.wIdade,0)/sw;
+    const vx = dd.reduce((s,m)=>s+m.wIdade*(m.D-mx)**2,0)/sw;
+    const cxy = dd.reduce((s,m)=>s+m.wIdade*(m.D-mx)*(m.q-my),0)/sw;
+    slope = vx > 1e-9 ? Math.max(cxy/vx, 0) : 0;
   }
 
   const out = activeMaps(ms).map(mp => {
     const onMap = ms.filter(m=>m.map===mp);
-    const thetaM = shrink(wmean(onMap.map(m=>[m.q,m.wTime])) ?? thetaG,
-                          kish(onMap.map(m=>m.wTime)), thetaG, P.kMap);
+    const thetaM = shrink(wmean(onMap.map(m=>[m.q,m.wIdade])), kish(onMap.map(m=>m.wIdade)), thetaG, P.kMap);
+    const n3 = kish(onMap.map(m=>m.w));
+    const thetaR = shrink(wmean(onMap.map(m=>[m.q,m.w])), n3, thetaM, P.kRoster);
 
-    const scored = onMap.map(m=>[m, m.wTime * rosterWeight(m.roster, lobby)]);
-    const n3 = kish(scored.map(([,w])=>w));
-    const thetaR = shrink(wmean(scored.map(([m,w])=>[m.q,w])) ?? thetaM,
-                          n3, thetaM, P.kRoster);
+    const dv = onMap.filter(m=>m.D!=null).map(m=>[m.D, m.w]);
+    const zn = kish(dv.map(([,w])=>w));
+    const Zraw = wmean(dv);
+    const Z = Zraw==null ? 0 : Zraw * zn/(zn + P.kPerf);
+    const pKD = clamp(thetaG + slope*Z, 0.01, 0.99);
 
-    let Z = 0;
-    if(temEu && mu!=null){
-      const vals = onMap.map(m=>[perfIndex(m),m.wTime]).filter(p=>p[0]!=null);
-      if(vals.length){
-        const zn = kish(vals.map(([,w])=>w));
-        Z = ((wmean(vals)-mu)/sd) * (zn/(zn+P.formShrink));
-      }
-    }
-
-    const p = sigmoid(logit(thetaR) + P.formBeta * Z);
+    const p = (1-P.kdShare)*thetaR + P.kdShare*pKD;
     const se = n3 > 1e-9 ? Math.sqrt(Math.max(p*(1-p),1e-6)/n3) : 0.5;
     const exact = onMap.filter(m =>
       m.roster.size===lobby.size && [...lobby].every(x=>m.roster.has(x)));
+    const wins = onMap.filter(m=>m.outcome===1), losses = onMap.filter(m=>m.outcome===0);
 
     return {
       map:mp, p, low:Math.max(0,p-P.z*se), high:Math.min(1,p+P.z*se),
@@ -396,21 +473,21 @@ function rank(lobbyIds, halfLife){
       exW:exact.filter(m=>m.outcome===1).length,
       exL:exact.filter(m=>m.outcome===0).length,
       conf: n3<3?"sem dados":n3<8?"baixa":n3<20?"media":"alta",
-      thetaG, thetaM, thetaR, Z, formPP:(p-thetaR)*100, temEu,
-      wTot: onMap.filter(m=>m.outcome===1).length,
-      lTot: onMap.filter(m=>m.outcome===0).length,
+      thetaG, thetaM, thetaR, pKD, Z, Zraw, slope,
+      winW: wmean(onMap.map(m=>[m.outcome,m.w])),
+      wTot: wins.length, lTot: losses.length,
     };
   });
 
   out.sort((a,b)=> b.p-a.p || b.nEff-a.nEff);
-  return { maps:out, thetaG, total:ms.length, sig: mapSignificance(ms, 40) };
+  return { maps:out, thetaG, slope, total:ms.length, sig: mapSignificance(ms, 40), ms, lobby };
 }
 
 /* ------------------------------------------------- teste de significancia
    As diferencas entre mapas sao maiores do que o acaso produziria? Testado
-   sobre os ROUNDS (~5.500), nao sobre vitorias (264), porque e onde o sinal
-   apareceria primeiro se existisse. Qui-quadrado com p pela aproximacao de
-   Wilson-Hilferty (bate com a permutacao ate a 2a casa nesta faixa). */
+   sobre os ROUNDS, nao sobre vitorias, porque e onde o sinal apareceria
+   primeiro se existisse. Qui-quadrado com p pela aproximacao de
+   Wilson-Hilferty. */
 function chiPValue(chi, df){
   if(df <= 0) return 1;
   const x = chi/df, z = (Math.pow(x,1/3) - (1 - 2/(9*df))) / Math.sqrt(2/(9*df));
@@ -443,10 +520,12 @@ function mapSignificance(rows, minN){
 }
 
 /* ------------------------------------------------------------------ UI */
-const S = { sel:new Set(), open:null, hl:99999, cons:false, soPremier:true };
+const S = { sel:new Set(), open:null, tmap:"", tall:false, seasons:new Set() };   // seasons vazio = todas
 const $ = s => document.querySelector(s);
 const pretty = m => m.replace(/^(de|cs)_/,"").replace(/^./,c=>c.toUpperCase());
 const pc = x => (x*100).toFixed(1)+"%";
+const sg = (x,d=1) => (x>=0?"+":"−") + Math.abs(x).toFixed(d);
+const fdata = ts => new Date(ts*1000).toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit",year:"2-digit"});
 
 function colorFor(p){
   const t = Math.max(0, Math.min(1, (p-0.35)/0.35));
@@ -469,7 +548,7 @@ function buildMates(){
     l.className = "mate" + (S.sel.has(p.id) ? " on" : "");
     l.dataset.id = p.id;
     l.innerHTML = `<input type="checkbox" autocomplete="off" id="m-${p.id}" ${S.sel.has(p.id)?"checked":""}>
-      <span class="nm">${p.id===EU ? "◈ " : ""}${p.nome}</span><span class="gm">${p.jogos}j</span>`;
+      <span class="nm">${p.id===EU ? "◈ " : ""}${p.nome}</span><span class="gm">${jogosSel(p)}j</span>`;
     l.querySelector("input").addEventListener("change", e => {
       e.target.checked ? S.sel.add(p.id) : S.sel.delete(p.id);
       l.classList.toggle("on", e.target.checked);
@@ -479,31 +558,92 @@ function buildMates(){
   }
 }
 
-function draw(){
-  const r = rank([...S.sel], S.hl);
-  const maps = [...r.maps];
-  if(S.cons) maps.sort((a,b)=> b.low-a.low);
+const jogosSel = p => S.seasons.size ? [...S.seasons].reduce((s,n) => s + p.jogos[n], 0) : p.jogos[0];
+function updateCounts(){
+  for(const p of PLAYERS){
+    const g = document.querySelector(`.mate[data-id="${p.id}"] .gm`);
+    if(g) g.textContent = jogosSel(p) + "j";
+  }
+}
+/* "Season 5", "Seasons 4 e 5", "Seasons 2, 4 e 5" */
+function seasonLabel(){
+  const ns = [...S.seasons].sort((a,b)=>a-b);
+  if(!ns.length) return "";
+  if(ns.length === 1) return "Season " + ns[0];
+  return "Seasons " + ns.slice(0,-1).join(", ") + " e " + ns[ns.length-1];
+}
+// datas das seasons sao meia-noite UTC; em horario de Brasilia cairiam no dia anterior
+const fdataUTC = ts => new Date(ts*1000).toLocaleDateString("pt-BR",
+  {day:"2-digit",month:"2-digit",year:"2-digit",timeZone:"UTC"});
+const seasonRange = s => `${fdataUTC(s.t0)} – ${s.t1===Infinity ? "hoje" : fdataUTC(s.t1 - 86400)}`;
+function buildSeasons(){
+  const box = $("#seg-season");
+  const opts = [{ n:0, lab:"Todas", title:"Todas as seasons" }].concat(SEASONS.map(s => ({
+    n:s.n, lab:"S"+s.n + (s.t1===Infinity ? " · atual" : ""), title:`Season ${s.n}: ${seasonRange(s)}` })));
+  box.innerHTML = opts.map(o => `<button type="button" data-s="${o.n}" title="${o.title}"
+    aria-pressed="false">${o.lab}</button>`).join("");
+  const sync = () => [...box.children].forEach(x => {
+    const n = +x.dataset.s;
+    x.setAttribute("aria-pressed", String(n === 0 ? S.seasons.size === 0 : S.seasons.has(n)));
+  });
+  sync();
+  box.addEventListener("click", e => {
+    const b = e.target.closest("button"); if(!b) return;
+    const n = +b.dataset.s;
+    if(n === 0) S.seasons.clear();
+    else S.seasons.has(n) ? S.seasons.delete(n) : S.seasons.add(n);
+    if(S.seasons.size === SEASONS.length) S.seasons.clear();   // todas marcadas = Todas
+    S.open = null; S.tmap = ""; S.tall = false;
+    sync();
+    updateCounts();
+    draw();
+  });
+}
 
-  $("#m-n").textContent = r.total;
+/* peso de cada partida pela idade, em numeros, para o lobby marcado */
+function drawPeso(r){
+  const ms = r.ms || [], n = ms.length;
+  if(n < 2){ $("#peso").innerHTML = ""; return; }
+  const em = dias => {
+    const lim = ms[n-1].ts - dias*86400;
+    let c = 0; for(const m of ms) if(m.ts <= lim) c++;
+    return c ? Math.round(100*(c-1)/(n-1)) : null;
+  };
+  const marcas = [["2 semanas",14],["1 mês",30],["3 meses",91],["6 meses",182],["1 ano",365],["2 anos",730]]
+    .map(([t,d]) => [t, em(d)]).filter(([,v]) => v != null);
+  $("#peso").innerHTML = `Peso de cada partida${S.seasons.size ? ` (só <b>${seasonLabel()}</b>, refeito dentro do recorte)` : ""}: a mais recente deste lobby
+    (${fdata(ms[n-1].ts)}) vale <b>100%</b>, a primeira (${fdata(ms[0].ts)}) vale <b>0%</b>,
+    e as ${(n-2).toLocaleString("pt-BR")} do meio sobem em partes iguais
+    (<b>${(100/(n-1)).toFixed(3).replace(".",",")}%</b> por partida). Contando da última: ` +
+    marcas.map(([t,v]) => `${t} antes <b>${v}%</b>`).join(" · ") + ".";
+}
+
+function draw(){
+  const r = rank([...S.sel]);
+  S.last = r;
+  const maps = r.maps;
+
+  $("#m-n").textContent = r.total.toLocaleString("pt-BR");
+  $("#m-base").textContent = pc(r.thetaG);
+  $("#lobby-n").textContent = (S.sel.size ? S.sel.size + " no lobby" : "ninguém marcado")
+    + (S.seasons.size ? " · " + seasonLabel() : "");
+  const sel = SEASONS.filter(s => S.seasons.has(s.n));
+  $("#season-info").textContent = sel.length === 1 ? seasonRange(sel[0])
+    : sel.map(s => "S" + s.n + ": " + seasonRange(s)).join(" · ");
+  const vv = r.ms.filter(m=>m.outcome===1).length, dd = r.ms.filter(m=>m.outcome===0).length;
+  $("#m-wl").textContent = `${vv}–${dd}`;
+  drawPeso(r);
+
   const box = $("#rows");
   box.innerHTML = "";
-  $("#m-base").textContent = pc(r.thetaG);
-  $("#lobby-n").textContent = S.sel.size ? S.sel.size + " no lobby" : "ninguém marcado";
-  // V-D do proprio lobby, ja orientado
-  let vv=0, dd=0;
-  for(const x of ROWS){
-    if(S.soPremier && !x.premier) continue;
-    const o = orient(x, S.sel); if(!o) continue;
-    if(o.rw>o.rl) vv++; else if(o.rl>o.rw) dd++;
-  }
-  $("#m-wl").textContent = `${vv}–${dd}`;
-
   if(!maps.length){
-    box.innerHTML = `<div class="vazio">Marque pelo menos uma pessoa no lobby
-      para ver a ordem de pick.</div>`;
+    box.innerHTML = S.sel.size && S.seasons.size
+      ? `<div class="vazio">Ninguém deste lobby jogou Premier ${S.seasons.size > 1 ? "nas" : "na"} ${seasonLabel()}.</div>`
+      : `<div class="vazio">Marque pelo menos uma pessoa no lobby para ver a ordem de pick.</div>`;
     $("#ban").innerHTML = "";
     $("#verdict").innerHTML = "";
     $("#foot").innerHTML = rodape();
+    drawTable(r);
     return;
   }
 
@@ -513,6 +653,7 @@ function draw(){
     btn.className = "row" + (i===0?" top":"");
     btn.setAttribute("aria-expanded", S.open===m.map ? "true":"false");
     const col = colorFor(m.p);
+    const z = m.Zraw==null ? "—" : sg(m.Zraw);
     btn.innerHTML = `
       <span class="pos">${i+1}</span>
       <span class="mp">${pretty(m.map)}</span>
@@ -523,8 +664,8 @@ function draw(){
       </span>
       <span class="pct" style="color:${col}">${(m.p*100).toFixed(1)}%</span>
       <span class="side">
-        <span class="conf c-${m.conf==="sem dados"?"sem":m.conf}">${m.conf}</span>
-        <span class="nn">n_ef ${m.nEff.toFixed(1)} · ${m.games}j</span>
+        <span class="conf c-${m.conf==="sem dados"?"sem":m.conf}">${m.conf==="media"?"média":m.conf}</span>
+        <span class="nn">vit. ${m.winW==null?"—":pc(m.winW)} · K/D ${z}</span>
       </span>`;
     btn.addEventListener("click", () => { S.open = S.open===m.map ? null : m.map; draw(); });
     box.appendChild(btn);
@@ -561,48 +702,111 @@ function draw(){
      <span class="mapx">${pretty(pior.map)}</span>
      <span>${pc(pior.p)} esperado · ${pior.wTot}V-${pior.lTot}D no histórico</span>`;
 
+  drawTable(r);
   $("#foot").innerHTML = rodape();
 }
 
+/* Relevancia de cada partida, no estilo da HLTV: idade x lineup, com a
+   partida mais relevante do recorte = 100%. E exatamente o peso que ela tem
+   na media do mapa com este time (antes do encolhimento). */
+function drawTable(r){
+  const sel = $("#tmap"), tb = $("#tbl"), tf = $("#tfoot");
+  const maps = r.maps ? r.maps.map(m=>m.map) : [];
+  const alvo = S.open || S.tmap;
+  sel.innerHTML = `<option value="">Todos os mapas</option>` +
+    maps.map(m=>`<option value="${m}" ${m===alvo?"selected":""}>${pretty(m)}</option>`).join("");
+  if(!r.ms || !r.ms.length){ tb.innerHTML=""; tf.innerHTML=""; $("#tlead").innerHTML=""; return; }
+  const pool = new Set(maps);
+  const lista = r.ms.filter(m => pool.has(m.map) && (!alvo || m.map===alvo)).map(m => {
+    let inter = 0; for(const x of m.roster) if(r.lobby.has(x)) inter++;
+    return { m, inter };
+  }).sort((a,b)=> b.m.w-a.m.w || b.m.ts-a.m.ts);
+  const max = lista.length && lista[0].m.w > 0 ? lista[0].m.w : 1;
+  const soma = lista.reduce((s,x)=>s+x.m.w,0) || 1;
+  const top = lista.slice(0, S.tall ? lista.length : 25);
+  let acum = 0; for(const x of top) acum += x.m.w;
+
+  const lw = j => Math.round(100*(P.rosterFloor + (1-P.rosterFloor)*Math.pow(j, P.rosterGamma)));
+  $("#tlead").innerHTML = `Relevância = <b>idade</b> × <b>lineup</b>, e a partida mais
+    relevante ${alvo?"de "+pretty(alvo):"do recorte"} vira 100%.
+    <b>Idade</b> é linear na ordem das partidas (a última vale 100%, a primeira 0%).
+    <b>Lineup</b> = quantos do lobby estavam no seu time; <b>+N</b> = outros do grupo junto,
+    o que também torna o time diferente (com 2 no lobby: 2/2 exato = 100%, 2/2 +1 = ${lw(2/3)}%,
+    1/2 = ${lw(1/2)}%, 0/2 = ${lw(0)}%).
+    <b>K/D</b> = desempenho de quem está no lobby naquela partida, em pontos acima ou abaixo
+    do nível que cada um tinha nas ${P.trail} partidas anteriores.
+    ${S.open?"":"Abra um mapa no ranking para ver só as partidas dele."}`;
+  tb.innerHTML = `<thead><tr>
+      <th>Res.</th><th>Data</th><th>Mapa</th><th class="r">Lineup</th><th class="r">K/D</th>
+      <th class="r hm">× Idade</th><th class="r hm">× Lineup</th>
+      <th class="r">Relevância</th></tr></thead><tbody>` +
+    top.map(({m,inter}) => {
+      const res = m.outcome===1?"v":m.outcome===0?"d":"";
+      const rel = m.w/max*100;
+      const extra = m.roster.size - inter;
+      const kd = m.D==null ? "—" : `<span class="${m.D>=0?"up":"dn"}">${sg(m.D)}</span>`;
+      return `<tr>
+        <td class="res ${res}">${res==="v"?"V":res==="d"?"D":"E"} ${m.rw}–${m.rl}</td>
+        <td>${fdata(m.ts)}</td><td class="mpn">${pretty(m.map)}</td>
+        <td class="r">${inter}/${r.lobby.size}${extra?` <span title="outros do grupo no mesmo time">+${extra}</span>`:""}</td>
+        <td class="r">${kd}</td>
+        <td class="r hm">${(m.wIdade*100).toFixed(1)}%</td>
+        <td class="r hm">${Math.round(m.wLine*100)}%</td>
+        <td class="r"><span class="relv"><span class="relbar"><i style="width:${rel.toFixed(1)}%"></i></span>
+          <b>${rel>=10?rel.toFixed(1):rel.toFixed(2)}%</b></span></td></tr>`;
+    }).join("") + `</tbody>`;
+  tf.innerHTML = `<span>${top.length} de ${lista.length} partidas · essas somam
+      <b>${Math.round(acum/soma*100)}%</b> do peso total${alvo?" do mapa":""}</span>` +
+    (lista.length > 25 ? `<button type="button" id="tall">${S.tall?"mostrar só as 25 primeiras":"mostrar todas"}</button>` : "");
+  const b = $("#tall"); if(b) b.addEventListener("click", () => { S.tall = !S.tall; drawTable(r); });
+}
+
 function rodape(){
-  const dias = Math.round(Math.max(...ROWS.map(x=>x.age)));
   const nPrem = ROWS.filter(r=>r.premier).length;
   const nomes = PLAYERS.filter(p=>S.sel.has(p.id)).map(p=>p.nome).join(" + ") || "ninguém";
-  return `Histórico dos cinco no CSStats: <b>${ROWS.length}</b> partidas distintas em
-     ${Math.round(dias/30)} meses (${nPrem} de Premier), já sem abandonos e partidas
-     interrompidas. Estão aqui <b>todas</b> as partidas de cada um, inclusive as que
-     vocês jogaram separados — por isso dá para tirar você do lobby e ver só o colega.
-     <br>Lobby atual: <b>${nomes}</b>. O placar de cada partida é orientado para o lado
-     de quem está marcado, e o histórico inteiro é repesado pela semelhança com esse time.
-     <br>A meia-vida de <b>${S.hl>=99999?"∞ (sem decaimento)":S.hl+" dias"}</b> e o rigor de
-     roster saíram de um backtest que prevê cada partida usando só as anteriores; encurtar a
-     memória piorou a previsão — no conjunto completo o melhor é <b>não descontar nada</b>: Brier 0.2451 contra 0.2454 de chutar 50%, a primeira vez que o modelo passa a moeda.
-     <br>K/D, ADR e rating por partida o CSStats só expõe para o dono do perfil consultado,
-     então o termo de forma individual só entra quando <b>você</b> está no lobby.`;
+  return `Histórico dos ${PLAYERS.length} no CSStats: <b>${ROWS.length.toLocaleString("pt-BR")}</b>
+     partidas distintas, de ${fdata(ROWS[0].ts)} a ${fdata(ROWS[ROWS.length-1].ts)}, já sem
+     abandonos e partidas interrompidas. Só as <b>${nPrem.toLocaleString("pt-BR")} de Premier</b>
+     entram na conta: no Competitivo o mapa vem da fila, sem veto.
+     ${S.seasons.size ? `<br>Filtro: <b>${seasonLabel()}</b> (${SEASONS.filter(s=>S.seasons.has(s.n)).map(seasonRange).join("; ")}).
+       Só as partidas ${S.seasons.size > 1 ? "dessas seasons" : "dessa season"} entram, o peso 100%→0% é
+       refeito dentro do recorte (a mais antiga dele 0%, a mais recente 100%) e os mapas
+       listados são os que o lobby jogou nele. Só a conversão de K/D para % continua medida no histórico inteiro, porque
+       uma season sozinha tem partidas de menos para essa conta.` : ""}
+     <br>Lobby atual: <b>${nomes}</b>. Entram todas as partidas de Premier de quem está marcado,
+     juntos ou separados; o placar é virado para o lado deles e cada partida é pesada pela
+     idade e pela semelhança do time com o lobby.
+     <br>A % de cada mapa é <b>metade vitória, metade K/D</b>. Vitória = taxa de vitória
+     ponderada (com o saldo de rounds). K/D = índice de 0 a 99 de cada jogador do lobby em
+     cada partida (K/D 37,5%, ADR 37,5%, rating 25%), comparado com o nível dele nas
+     ${P.trail} partidas anteriores (o nível de cada um muda com o tempo); a conversão de
+     pontos de K/D para % de vitória sai do próprio histórico do lobby.
+     Nada disso é escolhido na página.`;
 }
 
 function detail(m){
   const d = document.createElement("div");
   d.className = "det";
-  const dif = (m.thetaR - m.thetaM) * 100;
   const notas = [];
-  if(m.conf==="sem dados") notas.push("Quase sem histórico com esse time aqui — o número é basicamente a sua média.");
+  if(m.conf==="sem dados") notas.push("Quase sem histórico com esse time aqui — o número é basicamente a média do lobby.");
   else if(m.conf==="baixa") notas.push("Amostra fina, intervalo largo. Trate como palpite.");
   else if(m.conf==="alta") notas.push("Amostra sólida para esse time.");
   else notas.push("Amostra razoável.");
-  if(Math.abs(dif) >= 2.5)
-    notas.push(`Esse time rende <b>${dif>0?"+":""}${dif.toFixed(1)} pp</b> aqui em relação ao seu ${pretty(m.map)} médio.`);
-  if(Math.abs(m.formPP) >= 1.5)
-    notas.push(`Seu rendimento individual ${m.formPP>0?"ajuda":"atrapalha"} (${m.formPP.toFixed(1)} pp).`);
+  const gap = (m.thetaR - m.pKD) * 100;
+  if(Math.abs(gap) >= 4)
+    notas.push(gap > 0
+      ? `Vocês ganham aqui <b>mais</b> do que o K/D explica (${sg(gap)} pp): parte disso pode ser sorte.`
+      : `O K/D aqui é <b>melhor</b> do que os resultados (${sg(gap)} pp): vocês jogam bem e perdem mais do que deveriam.`);
+  if(m.Zraw != null && Math.abs(m.Zraw) >= 2)
+    notas.push(`Desempenho do lobby aqui: <b>${sg(m.Zraw)} pontos</b> ${m.Zraw>0?"acima":"abaixo"} do nível de cada um na época.`);
 
   d.innerHTML = `<div class="dgrid">
     <div>
       <h3>Como chega nesse número</h3>
-      <div class="kv"><span>Sua base geral</span><b>${pc(m.thetaG)}</b></div>
-      <div class="kv"><span>→ neste mapa</span><b>${pc(m.thetaM)}</b></div>
-      <div class="kv"><span>→ com este time</span><b>${pc(m.thetaR)}</b></div>
-      <div class="kv"><span>→ sua forma aqui</span><b>${m.formPP>=0?"+":""}${m.formPP.toFixed(1)} pp</b></div>
-      <div class="kv sum"><span>Previsão</span><b>${pc(m.p)}</b></div>
+      <div class="kv"><span>Base do lobby</span><b>${pc(m.thetaG)}</b></div>
+      <div class="kv"><span>Pelas vitórias aqui</span><b>${pc(m.thetaR)}</b></div>
+      <div class="kv"><span>Pelo K/D aqui (${m.Zraw==null?"sem stats":sg(m.Zraw)+" pts"})</span><b>${pc(m.pKD)}</b></div>
+      <div class="kv sum"><span>Previsão (metade de cada)</span><b>${pc(m.p)}</b></div>
     </div>
     <div>
       <h3>Amostra</h3>
@@ -614,30 +818,24 @@ function detail(m){
     </div>
     <div>
       <h3>Leitura</h3>
-      <div class="note">${notas.join(" ")}</div>
+      <div class="note">${notas.join(" ")}
+        <br><span style="font-size:12px">Neste lobby, jogar 1 ponto de K/D acima da média vale
+        <b>${sg(m.slope*100)} pp</b> de vitória (medido no histórico).</span></div>
     </div>
   </div>`;
   return d;
 }
 
 /* eventos */
-$("#seg-hl").addEventListener("click", e => {
-  const b = e.target.closest("button"); if(!b) return;
-  S.hl = +b.dataset.hl;
-  [...e.currentTarget.children].forEach(x => x.setAttribute("aria-pressed", x===b ? "true":"false"));
-  draw();
-});
-$("#cons").addEventListener("change", e => { S.cons = e.target.checked; draw(); });
-$("#prem").addEventListener("change", e => { S.soPremier = e.target.checked; draw(); });
+$("#tmap").addEventListener("change", e => { S.tmap = e.target.value; S.open = null; S.tall = false; draw(); });
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
 
 S.sel.add(PLAYERS[0].id); S.sel.add(PLAYERS[1].id);  // abre no uso tipico
 buildMates();
+buildSeasons();
 
-const d0 = new Date(Math.min(...ROWS.map(r=>r.ts))*1000);
-const d1 = new Date(Math.max(...ROWS.map(r=>r.ts))*1000);
-const fmt = d => d.toLocaleDateString("pt-BR",{month:"short",year:"numeric"});
-$("#sub").textContent = `${PLAYERS[0].nome} · CSStats · ${fmt(d0)} – ${fmt(d1)}`;
+const fmt = ts => new Date(ts*1000).toLocaleDateString("pt-BR",{month:"short",year:"numeric"});
+$("#sub").textContent = `${PLAYERS[0].nome} + ${PLAYERS.length-1} · CSStats · ${fmt(ROWS[0].ts)} – ${fmt(ROWS[ROWS.length-1].ts)}`;
 
 draw();
 </script>

@@ -1,146 +1,83 @@
-"""Backtest walk-forward nos dados REAIS: o modelo preve melhor que o que?
-
-Para cada partida i (em ordem cronologica), o modelo so enxerga as partidas
-anteriores a i e preve a probabilidade de vitoria naquele mapa, com aquele
-roster. Depois compara com o que de fato aconteceu.
-
-Metrica: Brier score = media((p - resultado)^2). Menor e melhor.
-  0.25 = chute de moeda (50% sempre)
-Tambem reporta log-loss e acuracia.
-
-Serve para duas coisas:
-  1. saber se o modelo vale mais que olhar winrate;
-  2. escolher os hiperparametros (meia-vida, piso de roster, encolhimentos)
-     por evidencia, em vez de chute.
-"""
-import itertools
-import json
+"""Melhorias para o calculo da v12 que NAO espremem os numeros (o usuario rejeitou
+o encolhimento forte da v13). Walk-forward 933 partidas + medida do espalhamento.
+  A  v12 como esta publicada
+  B  K/D contra o nivel do jogador na epoca (50 partidas anteriores), nao a media de sempre
+  C  parte do K/D ancorada no nivel DESTE time (lineup), igual a parte de vitoria
+  D  B + C"""
 import math
-import os
-import sys
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from mappick import store
-from mappick.model import MapPicker, _parse_dt
-
-CFG = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                  "config.json"), encoding="utf-8"))
-ME = CFG["me"]
-
-conn = store.connect()
-ALL = store.load_matches(conn, ME)
-conn.close()
-ALL.sort(key=lambda m: _parse_dt(m["played_at"]))
-print(f"{len(ALL)} partidas reais\n")
-
-WARMUP = 80          # precisa de algum historico antes de comecar a cobrar
+import modelo as M
 
 
-def outcome(m):
-    return 1.0 if m["result"] == "W" else (0.0 if m["result"] == "L" else 0.5)
+def rank_v(hist, lobby, now, base_lineup):
+    ms = M.build(hist, lobby)
+    if not ms:
+        return {}
+    wt = [m["wT"] for m in ms]
+    tG = M.shrink(M.wmean([(m["q"], m["wT"]) for m in ms]), M.kish(wt), .5, M.KG)
+    for m in ms:
+        m["w"] = m["wT"] * m["wR"]
+    tL = M.shrink(M.wmean([(m["q"], m["w"]) for m in ms]), M.kish([m["w"] for m in ms]), tG, M.KR)
+    dd = [(m["D"], m["q"], m["wT"]) for m in ms if m["D"] is not None and m["wT"] > 0]
+    slope = 0.0
+    if len(dd) > 20:
+        sw = sum(w for _, _, w in dd)
+        mx = sum(d * w for d, _, w in dd) / sw; my = sum(q * w for _, q, w in dd) / sw
+        vx = sum(w * (d - mx) ** 2 for d, _, w in dd) / sw
+        cxy = sum(w * (d - mx) * (q - my) for d, q, w in dd) / sw
+        slope = max(cxy / vx, 0) if vx > 1e-9 else 0.0
+    pool = {m["map"] for m in ms if now - m["ts"] <= M.POOL} or {m["map"] for m in ms}
+    base = tL if base_lineup else tG
+    out = {}
+    for mp in pool:
+        on = [m for m in ms if m["map"] == mp]
+        tM = M.shrink(M.wmean([(m["q"], m["wT"]) for m in on]), M.kish([m["wT"] for m in on]), tG, M.KM)
+        ws = [m["w"] for m in on]
+        n3 = M.kish(ws)
+        tR = M.shrink(M.wmean([(m["q"], w) for m, w in zip(on, ws)]), n3, tM, M.KR)
+        dv = [(m["D"], w) for m, w in zip(on, ws) if m["D"] is not None]
+        Z = 0.0
+        if dv:
+            zn = M.kish([w for _, w in dv])
+            Z = M.wmean(dv) * zn / (zn + M.KF)
+        pKD = min(max(base + slope * Z, .01), .99)
+        out[mp] = .5 * tR + .5 * pKD
+    return out
 
 
-def evaluate(cfg_model, verbose=False):
-    """Roda o walk-forward e devolve (brier, logloss, acc, n)."""
-    cfg = {**CFG, "model": {**CFG["model"], **cfg_model}}
-    briers, lls, hits = [], [], []
-    for i in range(WARMUP, len(ALL)):
-        hist, cur = ALL[:i], ALL[i]
-        # congela o "agora" no instante da partida avaliada: nada de espiar o futuro
-        picker = MapPicker(hist, ME, cfg)
-        picker.now = _parse_dt(cur["played_at"])
-        picker.matches = picker._prepare(hist)
-        picker._player_baselines = {}
-
-        mates = {str(p) for p in cur["roster"]} - {ME}
-        theta_g, _ = picker._level_global()
-        theta_m, _ = picker._level_map(cur["map"], theta_g)
-        theta_r, n_r, _ = picker._level_roster(cur["map"], mates, theta_m)
-        z, _ = picker._form_z(ME, cur["map"])
-        from mappick.model import logit, sigmoid
-        p = sigmoid(logit(theta_r) + cfg["model"]["form_beta"] * z)
-
-        y = outcome(cur)
-        p = min(max(p, 1e-6), 1 - 1e-6)
-        briers.append((p - y) ** 2)
-        lls.append(-(y * math.log(p) + (1 - y) * math.log(1 - p)))
-        hits.append(1.0 if (p >= 0.5) == (y >= 0.5) else 0.0)
-    n = len(briers)
-    return sum(briers) / n, sum(lls) / n, sum(hits) / n, n
-
-
-def baseline_const(v=0.5):
-    b = [(v - outcome(ALL[i])) ** 2 for i in range(WARMUP, len(ALL))]
-    return sum(b) / len(b)
+def avalia(trail, base_lineup):
+    M.TRAIL = trail
+    rows = M.load("data/artifact_v4.csv")
+    prem = [r for r in rows if r["prem"]]
+    b, dec, spreads = [], [], []
+    for t in prem[-1000:]:
+        sides = {}
+        for i in range(M.NP):
+            if t["teams"][i] != "-":
+                sides.setdefault(t["teams"][i], set()).add(i)
+        if len(sides) != 1:
+            continue
+        side, lobby = next(iter(sides.items()))
+        rw, rl = (t["a"], t["b"]) if side == "1" else (t["b"], t["a"])
+        if rw == rl:
+            continue
+        y = 1 if rw > rl else 0
+        o = rank_v([r for r in rows if r["ts"] < t["ts"]], lobby, t["ts"], base_lineup)
+        if t["map"] not in o or len(o) < 5:
+            continue
+        b.append((o[t["map"]] - y) ** 2)
+        order = sorted(o, key=lambda m: -o[m])
+        dec.append((order.index(t["map"]) / (len(order) - 1), y))
+        spreads.append(max(o.values()) - min(o.values()))
+    top = [y for p, y in dec if p <= 1 / 3]; bot = [y for p, y in dec if p >= 2 / 3]
+    a, c = sum(top) / len(top), sum(bot) / len(bot)
+    se = math.sqrt(a * (1 - a) / len(top) + c * (1 - c) / len(bot))
+    hoje = rank_v(rows, {0, 1}, rows[-1]["ts"], base_lineup)
+    return (len(b), sum(b) / len(b), 100 * (a - c), 100 * se, 100 * sum(spreads) / len(spreads),
+            sorted(((round(100 * v, 1), k[3:]) for k, v in hoje.items()), reverse=True))
 
 
-def baseline_running(by_map=False, with_roster=False):
-    """Winrate acumulado - a alternativa ingenua que o modelo precisa bater."""
-    b = []
-    for i in range(WARMUP, len(ALL)):
-        hist, cur = ALL[:i], ALL[i]
-        mates = {str(p) for p in cur["roster"]} - {ME}
-        sel = hist
-        if by_map:
-            sel = [m for m in sel if m["map"] == cur["map"]]
-        if with_roster:
-            sel = [m for m in sel if ({str(p) for p in m["roster"]} - {ME}) == mates]
-        p = (sum(outcome(m) for m in sel) / len(sel)) if sel else 0.5
-        p = min(max(p, 0.02), 0.98)
-        b.append((p - outcome(cur)) ** 2)
-    return sum(b) / len(b)
-
-
-print("=" * 66)
-print("REFERENCIAS (Brier - menor e melhor)")
-print("=" * 66)
-print(f"  moeda (50% sempre)            {baseline_const():.4f}")
-print(f"  winrate geral acumulado       {baseline_running():.4f}")
-print(f"  winrate por mapa              {baseline_running(by_map=True):.4f}")
-print(f"  winrate por mapa + roster     {baseline_running(by_map=True, with_roster=True):.4f}")
-
-b, ll, acc, n = evaluate({})
-print(f"\n  MODELO ATUAL                  {b:.4f}   logloss {ll:.4f}  acerto {acc*100:.1f}%  (n={n})")
-
-print()
-print("=" * 66)
-print("BUSCA DE HIPERPARAMETROS (no backtest, nao no ajuste)")
-print("=" * 66)
-grid = {
-    "half_life_days": [60, 120, 200, 365, 10000],
-    "roster_floor": [0.05, 0.15, 0.35],
-    "roster_sharpness": [1.0, 1.5],
-    "shrink_map": [4, 8, 16],
-    "shrink_roster": [3, 6, 12],
-    "form_beta": [0.0, 0.12, 0.30],
-}
-keys = list(grid)
-best, results = None, []
-for combo in itertools.product(*(grid[k] for k in keys)):
-    cfg_m = dict(zip(keys, combo))
-    br, _, ac, _ = evaluate(cfg_m)
-    results.append((br, ac, cfg_m))
-    if best is None or br < best[0]:
-        best = (br, ac, cfg_m)
-
-results.sort(key=lambda r: r[0])
-print("\n  melhores 8:")
-for br, ac, c in results[:8]:
-    print(f"    {br:.4f}  acerto {ac*100:4.1f}%  {c}")
-print("\n  piores 3:")
-for br, ac, c in results[-3:]:
-    print(f"    {br:.4f}  acerto {ac*100:4.1f}%  {c}")
-
-print(f"\n  ATUAL  {b:.4f}")
-print(f"  MELHOR {best[0]:.4f}  ->  ganho de {(b-best[0]):.4f} ({(b-best[0])/b*100:.1f}%)")
-print(f"         {best[2]}")
-
-# efeito isolado de cada parametro, mantendo o resto no melhor achado
-print("\n  sensibilidade (a partir do melhor):")
-for k in keys:
-    linha = []
-    for v in grid[k]:
-        cfg_m = {**best[2], k: v}
-        br, _, _, _ = evaluate(cfg_m)
-        linha.append(f"{v}={br:.4f}")
-    print(f"    {k:<20} " + "  ".join(linha))
+for nome, trail, bl in (("A v12 publicada", 0, False), ("B nivel da epoca", 50, False),
+                        ("C base do time", 0, True), ("D B + C", 50, True)):
+    n, br, dif, se, sp, hoje = avalia(trail, bl)
+    print("%-17s Brier %.5f  topo-fundo %+.1f pp (EP %.1f)  espalhamento medio %.1f pp" % (nome, br, dif, se, sp))
+    print("   voce+KICK hoje:", " ".join("%s %.1f" % (m, p) for p, m in hoje))
